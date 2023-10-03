@@ -28,7 +28,7 @@ namespace ENSEK_Meter_Reading.Controllers
         /// <summary>
         /// Single File Upload
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="fileDetails"></param>
         /// <returns></returns>
         [HttpPost("PostSingleFile")]
         public async Task<ActionResult> PostSingleFile([FromForm] FileUpload fileDetails)
@@ -39,8 +39,8 @@ namespace ENSEK_Meter_Reading.Controllers
             }
             try
             {
-                await uploadService.PostFileAsync(fileDetails.FileDetails, fileDetails.FileType);
-                return Ok();
+                var returnMeterResults = await uploadService.PostFileAsync(fileDetails.FileDetails, fileDetails.FileType);
+                return Ok(returnMeterResults);
             }
             catch (Exception)
             {

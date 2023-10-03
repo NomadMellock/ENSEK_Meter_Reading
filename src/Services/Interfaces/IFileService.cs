@@ -14,7 +14,7 @@ namespace ENSEK_Meter_Reading.Services.Interfaces
         /// <param name="fileData"></param>
         /// <param name="fileType"></param>
         /// <returns>Task</returns>
-        public Task PostFileAsync(IFormFile fileData, FileTypes fileType);
+        public Task<MeterResults> PostFileAsync(IFormFile fileData, FileTypes fileType);
 
         /// <summary>
         /// Task to retrieve multiple files

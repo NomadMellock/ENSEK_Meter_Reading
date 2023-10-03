@@ -1,4 +1,5 @@
-﻿using ENSEK_Meter_Reading.Models;
+﻿using ENSEK_Meter_Reading.Entities;
+using ENSEK_Meter_Reading.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ENSEK_Meter_Reading.Data
@@ -32,5 +33,10 @@ namespace ENSEK_Meter_Reading.Data
         /// FileDetails DbSet
         /// </summary>
         public DbSet<FileDetails> FileDetails { get; set; }
+        
+        /// <summary>
+        /// MeterReadings DbSet
+        /// </summary>
+        public DbSet<MeterReadings> MeterReadings { get; set; }
     }
 }
