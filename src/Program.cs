@@ -4,11 +4,11 @@ using ENSEK_Meter_Reading.Services;
 using ENSEK_Meter_Reading.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -19,6 +19,14 @@ builder.Services.AddDbContext<MeterReadingContext>();
 builder.Services.AddScoped<IFileService, FileService>();
 // Data Seeding
 builder.Services.AddTransient<SeedData>();
+
+// Add Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(Log.Logger);
 
 var app = builder.Build();
 
@@ -31,6 +39,12 @@ void SeedData(IHost app)
 
     if (scopedFactory != null)
     {
+        using (var scope = scopedFactory.CreateScope()) 
+        { 
+            var dbContext = scope.ServiceProvider.GetRequiredService<MeterReadingContext>();
+            dbContext.Database.EnsureCreated();
+        }
+
         using (var scope = scopedFactory.CreateScope())
         {
             var service = scope.ServiceProvider.GetService<SeedData>();

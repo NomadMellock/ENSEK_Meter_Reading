@@ -19,14 +19,16 @@ namespace ENSEK_Meter_Reading.Services
     public class FileService : IFileService
     {
         private readonly MeterReadingContext MeterReadingContext;
-        
+        private readonly ILogger<FileService> logger;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="MeterReadingContext"></param>
-        public FileService(MeterReadingContext MeterReadingContext)
+        public FileService(MeterReadingContext MeterReadingContext, ILogger<FileService> logger)
         {
             this.MeterReadingContext = MeterReadingContext;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace ENSEK_Meter_Reading.Services
         public async Task<MeterResults> ProcessMeterReadingsAsync(IFormFile fileData)
         {
             var returnMeterResults = new MeterResults();
-
+            logger.LogInformation($"Processing File: {fileData.FileName}");
             try
             {
                 
@@ -63,76 +65,110 @@ namespace ENSEK_Meter_Reading.Services
                     foreach (var record in records)
                     {
 
-                        var account = await MeterReadingContext.FindAsync<MeterReadings>(record.AccountId);
+                        var meterAvailable = await MeterReadingContext.FindAsync<MeterReadings>(record.AccountId);
                         
-                        if (account != null) 
+                        if (meterAvailable != null) 
                         {
+
+                            logger.LogInformation($"[{record.AccountId}] Found existing meter reading");
 
                             // No need to check if account exists in accounts table as we can only add meter readings to accounts that do exist
 
-                            if (DateTime.Parse(record.MeterReadingDateTime).CompareTo(account.MeterReadingDateTime) > 0)
+                            if (DateTime.Parse(record.MeterReadingDateTime).CompareTo(meterAvailable.MeterReadingDateTime) >= 0)
                             {
 
-                                account.MeterReadingDateTime = DateTime.Parse(record.MeterReadingDateTime);
+                                meterAvailable.MeterReadingDateTime = DateTime.Parse(record.MeterReadingDateTime);
 
-                                if (Math.Abs(record.MeterReadValue) < account.MeterReadValue) {
-                                    returnMeterResults.SuspicioudReadings++;
+                                if (Math.Abs(record.MeterReadValue) < meterAvailable.MeterReadValue) {
+                                    logger.LogInformation($"[{record.AccountId}] - Current meter reading is less than current meter reading");
+                                    returnMeterResults.SuspiciousReadings++;
                                 }
                                 else 
                                 {
                                     if (record.MeterReadValue.ToString().Length <= 5)
                                     {
-                                        account.MeterReadValue = Math.Abs(record.MeterReadValue); // Assuming all meter readings are positive, any readings with a - or negative would be counted as a 0 or prefixed with 0
+                                        meterAvailable.MeterReadValue = Math.Abs(record.MeterReadValue); // Assuming all meter readings are positive, any readings with a - or negative would be counted as a 0 or prefixed with 0
 
-                                        MeterReadingContext.Entry(account).State = EntityState.Modified; // Prevents locking for the entry in ef core
-                                        MeterReadingContext.MeterReadings.Update(account);
+                                        MeterReadingContext.Entry(meterAvailable).State = EntityState.Modified; // Prevents locking for the entry in ef core
+                                        MeterReadingContext.MeterReadings.Update(meterAvailable);
                                         await MeterReadingContext.SaveChangesAsync();
-                                        
+
+
+                                        logger.LogInformation($"[{record.AccountId}] - Updated successfully");
                                         returnMeterResults.UpdatedMeterReadings++;
                                     }
                                     else
                                     {
+                                        logger.LogInformation($"[{record.AccountId}] - Invalid meter reading value of : {record.MeterReadValue} should be in format: NNNNN");
                                         returnMeterResults.InvalidMeterReadings++;
                                     }
-
-                                    
                                 }
                             }
                             else
                             {
+                                logger.LogInformation($"[{record.AccountId}] - Date {record.MeterReadingDateTime} is less than current date: {meterAvailable.MeterReadingDateTime}" );
                                 returnMeterResults.Outdated++;
                             }
                         } 
                         else
                         {
 
+                            logger.LogInformation($"[{record.AccountId}] - Unable to find meter reading");
+
                             //Check account Exists in accounts table
+                            var accounts = MeterReadingContext.Find<Accounts>(record.AccountId);
 
-                            var meterReading = new MeterReadings()
+                            if (accounts != null)
                             {
-                                AccountId = record.AccountId,
-                                MeterReadingDateTime = DateTime.Parse(record.MeterReadingDateTime),
-                                MeterReadValue = Math.Abs(record.MeterReadValue) // Assuming all meter readings are positive, any readings with a - or negative would be counted as a 0 or prefixed with 0
-                            };
+                                logger.LogInformation($"[{record.AccountId}] - Creating new meter reading");
+
+                                var meterReading = new MeterReadings()
+                                {
+                                    AccountId = record.AccountId,
+                                    MeterReadingDateTime = DateTime.Parse(record.MeterReadingDateTime),
+                                    MeterReadValue = Math.Abs(record.MeterReadValue) // Assuming all meter readings are positive, any readings with a - or negative would be counted as a 0 or prefixed with 0
+                                };
 
 
-                            if (meterReading != null && meterReading.MeterReadValue.ToString().Length <= 5)
+                                if (meterReading != null && meterReading.MeterReadValue.ToString().Length <= 5)
+                                {
+                                    MeterReadingContext.MeterReadings.Add(meterReading);
+
+                                    logger.LogInformation($"[{record.AccountId}] - Created new meter reading");
+                                    returnMeterResults.NewMeterReadings++;
+                                }
+                                else
+                                {
+                                    logger.LogInformation($"[{record.AccountId}] - Invalid meter reading value of : {record.MeterReadValue} should be in format: NNNNN");
+                                    returnMeterResults.InvalidMeterReadings++;
+                                }
+                            }
+                            else
                             {
-                                MeterReadingContext.MeterReadings.Add(meterReading);
-                                returnMeterResults.NewMeterReadings++;
-                            } else
-                            {
-                                returnMeterResults.InvalidMeterReadings++;
+                                logger.LogInformation($"[{record.AccountId}] - Account is missing");
+                                returnMeterResults.MissingAccounts++;
                             }
                         }
+
                         
                         returnMeterResults.TotalMeterReadings++;
                         await MeterReadingContext.SaveChangesAsync();
                     }
                 }
+                
+                logger.LogInformation($"Results:");
+                logger.LogInformation($"   * {returnMeterResults.TotalMeterReadings} Total");
+                logger.LogInformation($"   * {returnMeterResults.NewMeterReadings} New");
+                logger.LogInformation($"   * {returnMeterResults.UpdatedMeterReadings} Updated");
+                logger.LogInformation($"   * {returnMeterResults.InvalidMeterReadings} Invalid");
+                logger.LogInformation($"   * {returnMeterResults.MissingAccounts} Missing Accounts");
+                logger.LogInformation($"   * {returnMeterResults.SuspiciousReadings} Suspicious (meter readings are less than current)");
+                logger.LogInformation($"   * {returnMeterResults.Outdated} OutDated (Date is less than current)");
+                logger.LogInformation($"Processing file Complete: {fileData.FileName}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex.Message,$"Processing file: {fileData.FileName} - {ex.StackTrace}");
                 throw;
             }
 

@@ -4,6 +4,7 @@ using ENSEK_Meter_Reading.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ENSEK_Meter_Reading.Migrations
 {
     [DbContext(typeof(MeterReadingContext))]
-    partial class MeterReadingContextModelSnapshot : ModelSnapshot
+    [Migration("20231004091951_Add-Accounts-Table")]
+    partial class AddAccountsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

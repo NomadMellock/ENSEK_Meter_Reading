@@ -31,9 +31,13 @@
         public int InvalidMeterReadings { get; set; }
 
         /// <summary>
+        /// Number of Missing Accounts
+        /// </summary>
+        public int MissingAccounts { get; set; }
+        /// <summary>
         /// Number of suspicious readings
         /// </summary>
-        public int SuspicioudReadings { get; set; }
+        public int SuspiciousReadings { get; set; }
 
         /// <summary>
         /// Entries that are already existing, however, date is less than the one on file

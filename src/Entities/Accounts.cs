@@ -14,7 +14,7 @@ namespace ENSEK_Meter_Reading.Entities
         /// Account Id
         /// </summary>
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Name("AccountId")]
         public int AccountId { get; set; }
 
