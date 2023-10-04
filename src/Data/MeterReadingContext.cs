@@ -33,5 +33,10 @@ namespace ENSEK_Meter_Reading.Data
         /// MeterReadings DbSet
         /// </summary>
         public DbSet<MeterReadings> MeterReadings { get; set; }
+
+        /// <summary>
+        /// Accounts DbSet
+        /// </summary>
+        public DbSet<Accounts> Accounts {  get; set; }
     }
 }

@@ -2,6 +2,7 @@
   "profiles": {
     "ENSEK_Meter_Reading": {
       "commandName": "Project",
+      "commandLineArgs": "seeddata",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
