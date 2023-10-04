@@ -30,8 +30,8 @@ namespace ENSEK_Meter_Reading.Controllers
         /// </summary>
         /// <param name="fileDetails"></param>
         /// <returns></returns>
-        [HttpPost("PostSingleFile")]
-        public async Task<ActionResult> PostSingleFile([FromForm] FileUpload fileDetails)
+        [HttpPost("meter-reading-uploads")]
+        public async Task<ActionResult> MeterReadingUploads([FromForm] FileUpload fileDetails)
         {
             if (fileDetails == null)
             {
@@ -75,32 +75,6 @@ namespace ENSEK_Meter_Reading.Controllers
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<MeterReadingController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<MeterReadingController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-
-        }
-
-        // PUT api/<MeterReadingController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<MeterReadingController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }
