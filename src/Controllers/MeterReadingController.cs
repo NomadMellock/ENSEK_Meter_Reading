@@ -39,30 +39,8 @@ namespace ENSEK_Meter_Reading.Controllers
             }
             try
             {
-                var returnMeterResults = await uploadService.PostFileAsync(fileDetails.FileDetails, fileDetails.FileType);
+                var returnMeterResults = await uploadService.ProcessMeterReadingsAsync(fileDetails.FileDetails);
                 return Ok(returnMeterResults);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Multiple File Upload
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost("PostMultipleFile")]
-        public async Task<ActionResult> PostMultipleFile([FromForm] List<FileUpload> fileDetails)
-        {
-            if (fileDetails == null)
-            {
-                return BadRequest();
-            }
-            try
-            {
-                await uploadService.PostMultiFileAsync(fileDetails);
-                return Ok();
             }
             catch (Exception)
             {

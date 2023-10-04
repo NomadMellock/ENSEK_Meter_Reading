@@ -11,10 +11,5 @@ namespace ENSEK_Meter_Reading.Models
         /// File Details
         /// </summary>
         public IFormFile FileDetails { get; set; }
-
-        /// <summary>
-        /// Available File Type
-        /// </summary>
-        public FileTypes FileType { get; set; }
     }
 }

@@ -9,18 +9,11 @@ namespace ENSEK_Meter_Reading.Services.Interfaces
     public interface IFileService
     {
         /// <summary>
-        /// Task to retrieve a single file
+        /// Process a meter reading uploaded file
         /// </summary>
         /// <param name="fileData"></param>
-        /// <param name="fileType"></param>
         /// <returns>Task</returns>
-        public Task<MeterResults> PostFileAsync(IFormFile fileData, FileTypes fileType);
-
-        /// <summary>
-        /// Task to retrieve multiple files
-        /// </summary>
-        /// <param name="fileData"></param>
-        /// <returns></returns>
-        public Task PostMultiFileAsync(List<FileUpload> fileData);
+        public Task<MeterResults> ProcessMeterReadingsAsync(IFormFile fileData);
+        
     }
 }

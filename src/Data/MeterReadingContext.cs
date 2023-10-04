@@ -30,11 +30,6 @@ namespace ENSEK_Meter_Reading.Data
         }
 
         /// <summary>
-        /// FileDetails DbSet
-        /// </summary>
-        public DbSet<FileDetails> FileDetails { get; set; }
-        
-        /// <summary>
         /// MeterReadings DbSet
         /// </summary>
         public DbSet<MeterReadings> MeterReadings { get; set; }

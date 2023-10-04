@@ -33,9 +33,8 @@ namespace ENSEK_Meter_Reading.Services
         /// Post a Single File
         /// </summary>
         /// <param name="fileData"></param>
-        /// <param name="fileType"></param>
         /// <returns></returns>
-        public async Task<MeterResults> PostFileAsync(IFormFile fileData, FileTypes fileType)
+        public async Task<MeterResults> ProcessMeterReadingsAsync(IFormFile fileData)
         {
             var returnMeterResults = new MeterResults();
 
@@ -46,7 +45,6 @@ namespace ENSEK_Meter_Reading.Services
                 {
                     id = 0,
                     FileName = fileData.FileName,
-                    FileType = fileType,
                 };
 
                 using (var stream = new MemoryStream())
@@ -132,9 +130,6 @@ namespace ENSEK_Meter_Reading.Services
                         await MeterReadingContext.SaveChangesAsync();
                     }
                 }
-
-                var result = MeterReadingContext.FileDetails.Add(fileDetails);
-                await MeterReadingContext.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -147,38 +142,6 @@ namespace ENSEK_Meter_Reading.Services
             return returnMeterResults;
         }
 
-        /// <summary>
-        /// Post Multiple Files
-        /// </summary>
-        /// <param name="fileData"></param>
-        /// <returns></returns>
-        public async Task PostMultiFileAsync(List<FileUpload> fileData)
-        {
-            try
-            {
-                foreach (FileUpload file in fileData)
-                {
-                    var fileDetails = new FileDetails()
-                    {
-                        id = 0,
-                        FileName = file.FileDetails.FileName,
-                        FileType = file.FileType,
-                    };
-                    using (var stream = new MemoryStream())
-                    {
-                        file.FileDetails.CopyTo(stream);
-                        fileDetails.FileData = stream.ToArray();
-                    }
-                    var result = MeterReadingContext.FileDetails.Add(fileDetails);
-                }
-                await MeterReadingContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        
         /// <summary>
         /// Utility to Copy Stream
         /// </summary>
